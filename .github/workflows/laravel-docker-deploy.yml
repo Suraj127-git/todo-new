@@ -74,6 +74,12 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
+        env:
+          APP_ENV: testing
+          COMPOSER_PROCESS_TIMEOUT: 0
+          COMPOSER_NO_INTERACTION: 1
+          COMPOSER_NO_AUDIT: 1
+          HCP_API_TOKEN: ${{ env.HCP_API_TOKEN }}
 
       # Step 8: Build Docker image
       - name: Build Docker image
