@@ -88,3 +88,7 @@ jobs:
             docker rm laravel-container || true
             docker run -d --name laravel-container -p 9090:80 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
             echo "Deployment to Home Server completed successfully."
+            echo "Checking Docker container status..."
+            docker ps -a
+            echo "Checking if the server is responding..."
+            curl -I http://localhost:9090
