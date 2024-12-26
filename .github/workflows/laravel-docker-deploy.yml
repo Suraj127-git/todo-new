@@ -18,15 +18,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up PHP environment
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, pdo_mysql, bcmath, intl
-          ini-values: post_max_size=256M, upload_max_filesize=256M, memory_limit=1G
-          tools: composer
-
       # Step 3: Fetch HCP API Token
       - name: Fetch HCP API Token
         id: fetch-hcp-token
@@ -61,12 +52,6 @@ jobs:
           set +a
           echo "Secrets fetched and sourced successfully."
 
-      # Step 5: Install Composer dependencies
-      - name: Install Composer dependencies
-        run: |
-          echo "Installing Composer dependencies..."
-          composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
-          echo "Composer dependencies installed successfully."
 
       # Step 7: Log in to DockerHub
       - name: Log in to DockerHub
@@ -101,5 +86,5 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
             docker stop laravel-container || true
             docker rm laravel-container || true
-            docker run -d --name laravel-container -p 8080:80 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
+            docker run -d --name laravel-container -p 9090:80 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
             echo "Deployment to Home Server completed successfully."
