@@ -8,6 +8,8 @@ export default {
         './resources/**/*.blade.php',
         './resources/**/*.js',
         './resources/**/*.vue',
+        './resources/**/*.svelte',
+        './node_modules/flowbite-svelte/**/*.{js,svelte}',
     ],
     theme: {
         extend: {
@@ -16,5 +18,5 @@ export default {
             },
         },
     },
-    plugins: [],
+    plugins: [require('flowbite/plugin')],
 };
