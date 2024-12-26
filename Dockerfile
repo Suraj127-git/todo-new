@@ -2,7 +2,7 @@
 FROM php:8.2-fpm-alpine3.18 AS base
 
 # Set working directory
-WORKDIR /var/www/html/todo-app
+WORKDIR /var/www/html
 
 # Install system dependencies, PHP extensions, Node.js, Nginx, and supervisor
 RUN apk --no-cache add \
@@ -69,9 +69,8 @@ USER root
 
 # Set proper permissions for storage, cache, and log directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
-    && find /var/www/html/storage/logs/ -type f -name "*.log" -exec chmod 775 {} \; \
-    && find /var/www/html/storage/logs/ -type f -name "*.log" -exec chown www-data:www-data {} \;
+    && chmod -R 775 /var/www/html/storage/logs /var/www/html/bootstrap/cache \
+    && find /var/www/html/storage/logs/ -type f -name "*.log" -exec chmod 775 {} \;
 
 # Expose port 80 for Nginx
 EXPOSE 80
