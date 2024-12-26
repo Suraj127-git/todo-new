@@ -1,4 +1,4 @@
-name: Laravel Docker Deploy
+name: Laravel Docker Deploy with Vault
 
 on:
   push:
@@ -6,27 +6,37 @@ on:
       - master
 
 jobs:
-  build:
+  test-and-deploy:
+    name: Test and Deploy
     runs-on: ubuntu-latest
 
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    env:
+      APP_ENV: testing
 
-      # Step 2: Set up PHP
+    steps:
+      # Step 1: Check out code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up PHP environment
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: '8.2'
+          extensions: mbstring, pdo_mysql, bcmath, intl
+          ini-values: post_max_size=256M, upload_max_filesize=256M, memory_limit=1G
+          tools: composer
 
       # Step 3: Fetch HCP API Token
       - name: Fetch HCP API Token
         id: fetch-hcp-token
+        env:
+          HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
         run: |
           echo "Fetching HCP API Token..."
-          HCP_API_TOKEN=$(curl --request POST \
-          --url https://auth.hashicorp.com/oauth/token \
+          HCP_API_TOKEN=$(curl --location "https://auth.idp.hashicorp.com/oauth2/token" \
+          --header "Content-Type: application/x-www-form-urlencoded" \
           --data-urlencode "client_id=$HCP_CLIENT_ID" \
           --data-urlencode "client_secret=$HCP_CLIENT_SECRET" \
           --data-urlencode "grant_type=client_credentials" \
@@ -64,26 +74,20 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-        env:
-          APP_ENV: testing
-          COMPOSER_PROCESS_TIMEOUT: 0
-          COMPOSER_NO_INTERACTION: 1
-          COMPOSER_NO_AUDIT: 1
-          HCP_API_TOKEN: ${{ env.HCP_API_TOKEN }}
 
       # Step 8: Build Docker image
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          docker build -t ${{ env.DOCKER_IMAGE_NAME }}:latest .
-          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker build -t ${{ secrets.DOCKER_IMAGE_NAME }}:latest .
+          docker tag ${{ secrets.DOCKER_IMAGE_NAME }}:latest ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
           echo "Docker image built and tagged successfully."
 
       # Step 9: Push Docker image to DockerHub
       - name: Push Docker image
         run: |
           echo "Pushing Docker image to DockerHub..."
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
           echo "Docker image pushed to DockerHub successfully."
 
       # Step 10: Deploy to Home Server via SSH
