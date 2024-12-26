@@ -54,7 +54,7 @@ jobs:
           response=$(curl --location "https://api.cloud.hashicorp.com/secrets/2023-11-28/organizations/bfd3ae55-9cb4-4442-a8f0-f0107a61dba1/projects/5fb3db9a-1ad2-4ebe-a7b9-63e24483a202/apps/laravel-github-action/secrets:open" \
           --header "Authorization: Bearer $HCP_API_TOKEN")
           echo "Response from HCP: $response"
-          echo "$response" | jq '.data[] | .key + "=" + .value' > secrets.env
+          echo "$response" | jq '.secrets[] | .name + "=" + .static_version.value' > secrets.env
           cat secrets.env
           set -a
           source secrets.env
