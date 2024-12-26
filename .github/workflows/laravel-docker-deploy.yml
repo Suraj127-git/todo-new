@@ -34,6 +34,7 @@ jobs:
           HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
           HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
         run: |
+          echo "Fetching HCP API Token..."
           HCP_API_TOKEN=$(curl --location "https://auth.idp.hashicorp.com/oauth2/token" \
           --header "Content-Type: application/x-www-form-urlencoded" \
           --data-urlencode "client_id=$HCP_CLIENT_ID" \
@@ -41,6 +42,7 @@ jobs:
           --data-urlencode "grant_type=client_credentials" \
           --data-urlencode "audience=https://api.hashicorp.cloud" | jq -r .access_token)
           echo "HCP_API_TOKEN=$HCP_API_TOKEN" >> $GITHUB_ENV
+          echo "HCP API Token fetched successfully."
 
       # Step 4: Fetch secrets from HCP
       - name: Fetch secrets from HCP
@@ -48,19 +50,28 @@ jobs:
         env:
           HCP_API_TOKEN: ${{ env.HCP_API_TOKEN }}
         run: |
+          echo "Fetching secrets from HCP..."
           curl --location "https://api.cloud.hashicorp.com/secrets/2023-11-28/organizations/bfd3ae55-9cb4-4442-a8f0-f0107a61dba1/projects/5fb3db9a-1ad2-4ebe-a7b9-63e24483a202/apps/laravel-github-action/secrets:open" \
           --header "Authorization: Bearer $HCP_API_TOKEN" | jq '.data[] | .key + "=" + .value' > secrets.env
+          cat secrets.env
           set -a
           source secrets.env
           set +a
+          echo "Secrets fetched and sourced successfully."
 
       # Step 5: Install Composer dependencies
       - name: Install Composer dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+        run: |
+          echo "Installing Composer dependencies..."
+          composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+          echo "Composer dependencies installed successfully."
 
       # Step 6: Run Laravel tests
       - name: Run tests
-        run: php artisan test --env=testing
+        run: |
+          echo "Running Laravel tests..."
+          php artisan test --env=testing
+          echo "Laravel tests completed."
 
       # Step 7: Log in to DockerHub
       - name: Log in to DockerHub
@@ -72,12 +83,17 @@ jobs:
       # Step 8: Build Docker image
       - name: Build Docker image
         run: |
+          echo "Building Docker image..."
           docker build -t ${{ env.DOCKER_IMAGE_NAME }}:latest .
           docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          echo "Docker image built and tagged successfully."
 
       # Step 9: Push Docker image to DockerHub
       - name: Push Docker image
-        run: docker push ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+        run: |
+          echo "Pushing Docker image to DockerHub..."
+          docker push ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          echo "Docker image pushed to DockerHub successfully."
 
       # Step 10: Deploy to Home Server via SSH
       - name: Deploy to Home Server
@@ -86,7 +102,9 @@ jobs:
           host: ${{ env.HOME_SERVER_HOST }}
           username: ${{ env.HOME_SERVER_USER }}
           script: |
+            echo "Deploying to Home Server..."
             docker pull ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
             docker stop laravel-container || true
             docker rm laravel-container || true
             docker run -d --name laravel-container -p 8080:80 ${{ env.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+            echo "Deployment to Home Server completed successfully."
