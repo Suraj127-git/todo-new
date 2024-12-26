@@ -81,6 +81,7 @@ jobs:
         with:
           host: ${{ secrets.HOME_SERVER_HOST }}
           username: ${{ secrets.HOME_SERVER_USER }}
+          key: ${{ secrets.HOME_SERVER_SSH_KEY }}
           script: |
             echo "Deploying to Home Server..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
@@ -91,4 +92,3 @@ jobs:
             echo "Checking Docker container status..."
             docker ps -a
             echo "Checking if the server is responding..."
-            curl -I http://localhost:9090
