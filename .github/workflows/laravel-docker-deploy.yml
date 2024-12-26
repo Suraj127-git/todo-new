@@ -75,12 +75,12 @@ jobs:
       #     docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
       #     echo "Docker image pushed to DockerHub successfully."
       
-      - name: Debug SSH Key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > debug_key.pem
-          cat debug_key.pem
-          chmod 600 debug_key.pem
-          ssh -i debug_key.pem ${{ secrets.HOME_SERVER_USER }}@${{ secrets.HOME_SERVER_HOST }} uname -a
+      # - name: Debug SSH Key
+      #   run: |
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > debug_key.pem
+      #     cat debug_key.pem
+      #     chmod 600 debug_key.pem
+      #     ssh -i debug_key.pem ${{ secrets.HOME_SERVER_USER }}@${{ secrets.HOME_SERVER_HOST }} uname -a
         
 
       # Step 10: Deploy to Home Server via SSH
