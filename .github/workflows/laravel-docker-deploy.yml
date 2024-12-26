@@ -3,7 +3,7 @@ name: Laravel Docker Deploy with Vault
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   test-and-deploy:
