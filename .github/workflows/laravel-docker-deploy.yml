@@ -82,13 +82,12 @@ jobs:
       #     chmod 600 debug_key.pem
       #     ssh -i debug_key.pem ${{ secrets.HOME_SERVER_USER }}@${{ secrets.HOME_SERVER_HOST }} uname -a
        
-      - name: Print Debug Info
-        run: |
-          echo "Host: ${{ secrets.HOME_SERVER_HOST }}"
-          echo "User: ${{ secrets.HOME_SERVER_USER }}"
-          echo "Key: ${{ secrets.SSH_PRIVATE_KEY }}"
+      # - name: Print Debug Info
+      #   run: |
+      #     echo "Host: ${{ secrets.HOME_SERVER_HOST }}"
+      #     echo "User: ${{ secrets.HOME_SERVER_USER }}"
+      #     echo "Key: ${{ secrets.SSH_PRIVATE_KEY }}"
     
-
       # Step 10: Deploy to Home Server via SSH
       - name: Deploy to Home Server
         uses: appleboy/ssh-action@v0.1.8
